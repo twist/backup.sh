@@ -3,13 +3,13 @@
 # CONFIGURATION
 
 # the directories you'd like to backup daylie
-DAYLY_ROTATING="/home/smbuser/datenbank"
+DAYLY_ROTATING=""
 # the directories you'd like to backup weekly
-WEEKLY="/home/smbuser/mitmacher /etc /home/svn /var/lib/foswiki"
+WEEKLY=""
 #how many rotating backups? (eg. after how many iterations should we replace the oldest one?)
 ROTATE_COUNT="7"
 # where to backup
-BACKUPDIR="/backup"
+BACKUPDIR=""
 # what day of the week should the weekly update be done?
 BACKUPDAY="1"
 
@@ -42,25 +42,8 @@ do
 		echo "created"
 	fi
 
-	#tar it
-	TARNAME="/backup/tmp/backup_$TODAY.tgz"
-	tar -czf $TARNAME $FILE
-	# encrypt it
-	gpg --batch --yes -r 0x089082BF  --encrypt $TARNAME
-	GPGNAME="$TARNAME.gpg"
+	backup_rotating
 
-	#replace the oldest one if tehre are more then ROTATE_COUNT
-
-	DIRCOUNT=`ls $BACKUPDIR$FILE | wc -l`
-	if [ $DIRCOUNT -gt $ROTATE_COUNT ]
-	then
-		#find the oldest file
-		OLDFILE=`ls -tr $BACKUPDIR$FILE | head -n 1`
-	        rm "$BACKUPDIR$FILE$OLDFILE"
-			
-	fi
-	#simply shove it there	
-	mv $GPGNAME "$BACKUPDIR$FILE"	
 done
 	
 
@@ -82,3 +65,34 @@ then
 
 	done
 fi
+
+
+function backup_rotating
+{
+
+	#tar it
+	TARNAME="/backup/tmp/backup_$TODAY.tgz"
+	tar -czf $TARNAME $FILE
+	# encrypt it
+	gpg --batch --yes -r 0x089082BF  --encrypt $TARNAME
+	GPGNAME="$TARNAME.gpg"
+
+	#replace the oldest one if tehre are more then ROTATE_COUNT
+
+	DIRCOUNT=`ls $BACKUPDIR$FILE | wc -l`
+	if [ $DIRCOUNT -gt $ROTATE_COUNT ]
+	then
+		#find the oldest file
+		OLDFILE=`ls -tr $BACKUPDIR$FILE | head -n 1`
+	        rm "$BACKUPDIR$FILE$OLDFILE"
+			
+	fi
+	#simply shove it there	
+	mv $GPGNAME "$BACKUPDIR$FILE"	
+
+}
+
+function backup_weekly
+{
+
+}
